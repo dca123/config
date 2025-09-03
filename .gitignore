@@ -1,3 +1,5 @@
 /*
 !.gitignore
 !/nvim/
+!/zsh/
+!starship.toml

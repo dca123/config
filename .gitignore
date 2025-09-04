@@ -2,4 +2,5 @@
 !.gitignore
 !/nvim/
 !/zsh/
+/zsh/.zsh_history
 !starship.toml

@@ -2,6 +2,8 @@ source ~/.zplug/init.zsh
 
 zplug "plugins/git",   from:oh-my-zsh
 zplug "plugins/alias-finder",   from:oh-my-zsh
+zplug "plugins/pnpm",   from:oh-my-zsh
+zplug "lib/directories",   from:oh-my-zsh
 zplug "zsh-users/zsh-autosuggestions", from:github
 zplug "MichaelAquilina/zsh-you-should-use"
 
@@ -15,9 +17,6 @@ alias ..="cd .."
 alias npm=pnpm
 alias npx="pnpm dlx"
 
-source ~/.config/zsh/directories.zsh
-source ~/.config/zsh/pnpm.plugin.zsh
-
 autoload -U up-line-or-beginning-search
 autoload -U down-line-or-beginning-search
 
@@ -26,7 +25,6 @@ zle -N down-line-or-beginning-search
 
 bindkey '^[[A' up-line-or-beginning-search    # Up arrow
 bindkey '^[[B' down-line-or-beginning-search    # Down arrow
-
 
 # pnpm
 export PNPM_HOME="/Users/devinda/Library/pnpm"

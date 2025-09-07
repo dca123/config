@@ -2,7 +2,7 @@ source ~/.zplug/init.zsh
 
 zplug "plugins/git",   from:oh-my-zsh
 zplug "plugins/alias-finder",   from:oh-my-zsh
-zplug "plugins/pnpm",   from:oh-my-zsh
+zplug "Leizhenpeng/zsh-plugin-pnpm"
 zplug "lib/directories",   from:oh-my-zsh
 zplug "zsh-users/zsh-autosuggestions", from:github
 zplug "MichaelAquilina/zsh-you-should-use"
@@ -11,6 +11,7 @@ bindkey -v
 export KEYTIMEOUT=1
 export EDITOR=nvim
 
+alias loadenv='export $(grep -v "^#" .env | xargs)'
 alias n="nvim"
 alias ..="cd .."
 

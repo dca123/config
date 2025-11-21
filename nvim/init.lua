@@ -43,6 +43,11 @@ vim.opt.swapfile = false
 vim.opt.scrolloff = 999
 vim.opt.signcolumn = "yes:1"
 
-
 vim.opt.title = true
 vim.opt.titlestring = [[%{fnamemodify(getcwd(), ':t')}]]
+
+vim.opt.foldmethod = 'expr'
+vim.opt.foldexpr = 'nvim_treesitter#foldexpr()'
+vim.opt.foldenable = true
+vim.opt.foldlevel = 99
+vim.opt.foldminlines = 5

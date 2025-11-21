@@ -38,7 +38,9 @@ return {
           library = {
             -- See the configuration section for more details
             -- Load luvit types when the `vim.uv` word is found
-            { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+            { path = "${3rd}/luv/library",      words = { "vim%.uv" } },
+            { path = "${3rd}/busted/library",   words = { "describe", "it", "before_each", "after_each" } },
+            { path = "${3rd}/luassert/library", words = { "assert" } }
           },
         },
       },
@@ -87,7 +89,7 @@ return {
         local client = vim.lsp.get_client_by_id(ctx.client_id)
         if client and client.name == 'typescript-tools' then
           result = vim.iter(result):map(function(hint)
-            local label = hint.label ---@type string
+            local label = hint.label ---@type stringfolke
             if label:len() >= 30 then
               label = label:sub(1, 29) .. "..."
             end

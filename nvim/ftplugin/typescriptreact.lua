@@ -13,3 +13,4 @@ end)
 
 vim.cmd("iab log console.log()<Left>")
 vim.cmd("iab if if()<Left>")
+vim.opt_local.iskeyword:append("-")

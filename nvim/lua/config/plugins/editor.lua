@@ -22,5 +22,9 @@ return {
   {
     "lewis6991/gitsigns.nvim",
     opts = {}
+  },
+  {
+    dir = "~/Projects/example.nvim",
+    opts = { name = "Devinda" }
   }
 }

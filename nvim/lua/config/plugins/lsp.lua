@@ -79,6 +79,23 @@ return {
         }
       } }
 
+      lsp_config.ocamllsp.setup {
+        cmd = { 'ocamllsp' },
+        filetypes = {
+          'ocaml',
+          'ocaml.interface',
+          'ocaml.menhir',
+          'ocaml.ocamllex',
+          'dune',
+          'reason'
+        },
+        root_markers = {
+          { 'dune-project', 'dune-workspace' },
+          { "*.opam",       "esy.json",      "package.json" },
+          '.git'
+        },
+        settings = {},
+      }
 
       vim.keymap.set("n", "<leader>sd", vim.diagnostic.open_float)
       vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action)

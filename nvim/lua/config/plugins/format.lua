@@ -13,6 +13,7 @@ return {
         "jsonc",
         "astro",
         "graphql",
+        "html"
       }
       local formatters_by_ft = {}
       for _, v in pairs(prettierd) do

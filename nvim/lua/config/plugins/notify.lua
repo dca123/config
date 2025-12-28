@@ -1,10 +1,16 @@
 return {
   {
     "rcarriga/nvim-notify",
-    config = function()
+    opts = {
+      merge_duplicates = true,
+    },
+    config = function(_, opts)
+      -- Dynamically get the background from your Dracula theme
+      local dracula_bg = require("dracula").colors().bg
+      opts.background_colour = dracula_bg
+      require("notify").setup(opts)
       vim.notify = require("notify")
     end,
-    opts = {}
   },
   {
     "TobinPalmer/Tip.nvim",

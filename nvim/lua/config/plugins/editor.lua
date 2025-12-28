@@ -27,12 +27,4 @@ return {
     dir = "~/Projects/example.nvim",
     opts = { name = "Devinda" }
   },
-  {
-    "OXY2DEV/markview.nvim",
-    dependencies = {
-      "nvim-treesitter/nvim-treesitter",
-      "nvim-tree/nvim-web-devicons"
-    },
-    opts = {}
-  }
 }

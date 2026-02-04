@@ -15,7 +15,10 @@ return {
         "graphql",
         "html"
       }
-      local formatters_by_ft = {}
+      local formatters_by_ft = {
+        sh = { "shfmt" },
+        zsh = { "beautysh" },
+      }
       for _, v in pairs(prettierd) do
         formatters_by_ft[v] = { 'prettierd' }
       end

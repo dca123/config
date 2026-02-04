@@ -23,6 +23,17 @@ return {
     "lewis6991/gitsigns.nvim",
     opts = {}
   },
+  -- {
+  --   'bloznelis/before.nvim',
+  --   config = function()
+  --     local before = require('before')
+  --     before.setup()
+  --
+  --     vim.keymap.set('n', '<C-h>', before.jump_to_last_edit, {})
+  --     vim.keymap.set('n', '<C-l>', before.jump_to_next_edit, {})
+  --     vim.keymap.set('n', '<leader>oe', before.show_edits_in_telescope, {})
+  --   end
+  -- },
   {
     dir = "~/Projects/example.nvim",
     opts = { name = "Devinda" }

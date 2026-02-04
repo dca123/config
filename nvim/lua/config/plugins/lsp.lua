@@ -7,8 +7,6 @@ return {
       local capabilities = require("blink.cmp").get_lsp_capabilities()
       require('typescript-tools').setup {
         capabilities = capabilities,
-        root_dir = require("lspconfig.util").root_pattern("package.json"),
-        single_file_support = false,
         settings = {
           tsserver_file_preferences = {
             includeInlayParameterNameHints = "all",
@@ -48,9 +46,13 @@ return {
     config = function()
       local capabilities = require("blink.cmp").get_lsp_capabilities()
 
-      local lsp_config = require('lspconfig')
-      lsp_config.lua_ls.setup({
+      -- Global config for all servers
+      vim.lsp.config('*', {
         capabilities = capabilities,
+      })
+
+      -- Server specific configs
+      vim.lsp.config('lua_ls', {
         settings = {
           Lua = {
             hint = {
@@ -60,26 +62,29 @@ return {
           }
         }
       })
-      lsp_config.denols.setup {
-        root_dir = lsp_config.util.root_pattern("deno.json", "deno.jsonc"),
-      }
-      lsp_config.astro.setup {}
-      lsp_config.tailwindcss.setup {}
-      lsp_config.gopls.setup { cmd = { "/Users/devinda/go/bin/gopls" }, settings = {
-        gopls = {
-          hints = {
-            assignVariableTypes = true,
-            compositeLiteralFields = true,
-            compositeLiteralTypes = true,
-            constantValues = true,
-            functionTypeParameters = true,
-            parameterNames = true,
-            rangeVariableTypes = true,
+
+      vim.lsp.config('denols', {
+        root_markers = { "deno.json", "deno.jsonc" },
+      })
+
+      vim.lsp.config('gopls', {
+        cmd = { "/Users/devinda/go/bin/gopls" },
+        settings = {
+          gopls = {
+            hints = {
+              assignVariableTypes = true,
+              compositeLiteralFields = true,
+              compositeLiteralTypes = true,
+              constantValues = true,
+              functionTypeParameters = true,
+              parameterNames = true,
+              rangeVariableTypes = true,
+            }
           }
         }
-      } }
+      })
 
-      lsp_config.ocamllsp.setup {
+      vim.lsp.config('ocamllsp', {
         cmd = { 'ocamllsp' },
         filetypes = {
           'ocaml',
@@ -95,7 +100,10 @@ return {
           '.git'
         },
         settings = {},
-      }
+      })
+
+      -- Enable servers
+      vim.lsp.enable({ "lua_ls", "denols", "astro", "tailwindcss", "gopls", "ocamllsp" })
 
       vim.keymap.set("n", "<leader>sd", vim.diagnostic.open_float)
       vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action)
@@ -106,7 +114,7 @@ return {
         local client = vim.lsp.get_client_by_id(ctx.client_id)
         if client and client.name == 'typescript-tools' then
           result = vim.iter(result):map(function(hint)
-            local label = hint.label ---@type stringfolke
+            local label = hint.label
             if label:len() >= 30 then
               label = label:sub(1, 29) .. "..."
             end
@@ -125,16 +133,19 @@ return {
           if not client then
             return
           end
+
+          -- Go to definition
+          -- For typescript-tools, we use TSToolsGoToSourceDefinition to avoid going to imports
+          if client.name == "typescript-tools" then
+            vim.keymap.set("n", "gd", "<cmd>TSToolsGoToSourceDefinition<cr>",
+              { buffer = args.buf, desc = "Go to Source Definition" })
+            vim.b[args.buf].ts_tools_attached = true
+          elseif client.supports_method("textDocument/definition") and not vim.b[args.buf].ts_tools_attached then
+            vim.keymap.set("n", "gd", vim.lsp.buf.definition, { buffer = args.buf, desc = "Go to Definition" })
+          end
+
           if client.supports_method("textDocument/inlay_hint") then
             vim.lsp.inlay_hint.enable(true, { 0 })
-          end
-          if client.supports_method("textDocument/formatting") or client.name == "biome" then
-            vim.api.nvim_create_autocmd("BufWritePre", {
-              buffer = args.buf,
-              callback = function()
-                -- vim.lsp.buf.format({ bufnr = args.buf, id = client.id })
-              end,
-            })
           end
         end,
       })

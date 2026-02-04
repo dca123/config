@@ -27,6 +27,7 @@ vim.keymap.set("n", "<leader>ch", "<CMD>noh<CR>", { desc = "Clear highlights" })
 vim.keymap.set('t', '<M-Esc>', '<C-\\><C-n>', { noremap = true, desc = "Exit terminal" })
 -- Enter terminal mode
 vim.keymap.set('n', '<leader>t', '<CMD>terminal<CR>', { noremap = true, desc = "Open terminal" })
+vim.keymap.set('n', '<leader>oc', '<CMD>terminal opencode<CR>i', { noremap = true, desc = "Open OpenCode" })
 
 vim.keymap.set("n", '<leader>i',
   function()

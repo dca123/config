@@ -1,6 +1,16 @@
 /*
 !.gitignore
 !/nvim/
+!/kitty/
 !/zsh/
+
+# zsh generated/cache files
 /zsh/.zsh_history
+/zsh/.zcompdump*
+/zsh/.zsh_sessions/
+/zsh/.cache/
+
 !starship.toml
+
+# opencode plans
+**/.plans

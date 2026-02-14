@@ -46,13 +46,162 @@ return {
         return true
       end
 
-      local function terminal_label(bufnr)
-        local function basename(path)
-          return (path:gsub("\\", "/")):match("([^/]+)$") or path
+      local function basename(path)
+        return (path:gsub("\\", "/")):match("([^/]+)$") or path
+      end
+
+      local function tty_from_pty(pty)
+        if type(pty) ~= "string" or pty == "" then
+          return nil
         end
 
+        -- Examples:
+        --   macOS: /dev/ttys003 -> ttys003
+        --   Linux: /dev/pts/1   -> pts/1
+        local norm = pty:gsub("\\", "/")
+        return (norm:gsub("^/dev/", ""))
+      end
+
+      local function terminal_running_command(bufnr, cache)
+        cache = cache or {}
+        cache.running = cache.running or {}
+
+        if cache.running[bufnr] ~= nil then
+          return cache.running[bufnr] or nil
+        end
+
+        local chan = vim.bo[bufnr].channel
+        if not chan or chan == 0 then
+          cache.running[bufnr] = false
+          return nil
+        end
+
+        local ok, info = pcall(vim.api.nvim_get_chan_info, chan)
+        if not ok or not info or type(info.pty) ~= "string" or info.pty == "" then
+          cache.running[bufnr] = false
+          return nil
+        end
+
+        local tty = tty_from_pty(info.pty)
+        if not tty or tty == "" then
+          cache.running[bufnr] = false
+          return nil
+        end
+
+        local shell_pid = tonumber(vim.fn.jobpid(chan))
+        if not shell_pid then
+          cache.running[bufnr] = false
+          return nil
+        end
+
+        local cmd = { "ps", "-t", tty, "-o", "pid=,ppid=,command=" }
+        local ps = vim.system(cmd, { text = true }):wait()
+        if not ps or ps.code ~= 0 or not ps.stdout or ps.stdout == "" then
+          cache.running[bufnr] = false
+          return nil
+        end
+
+        local processes = {}
+        for _, line in ipairs(vim.split(vim.trim(ps.stdout), "\n", { trimempty = true })) do
+          local pid, ppid, command = line:match("^%s*(%d+)%s+(%d+)%s+(.*)$")
+          pid, ppid = tonumber(pid), tonumber(ppid)
+          if pid and ppid and command and command ~= "" then
+            processes[pid] = { ppid = ppid, command = vim.trim(command) }
+          end
+        end
+
+        local function is_descendant(pid)
+          local depth = 0
+          local cur = pid
+          while processes[cur] and depth < 50 do
+            if cur == shell_pid then
+              return true, depth
+            end
+            cur = processes[cur].ppid
+            depth = depth + 1
+          end
+          return false, depth
+        end
+
+        local best_cmd
+        local best_depth = -1
+        for pid, proc in pairs(processes) do
+          if pid ~= shell_pid and not proc.command:match("^ps%s") then
+            local ok_desc, depth = is_descendant(pid)
+            if ok_desc and depth > best_depth then
+              best_depth = depth
+              best_cmd = proc.command
+            end
+          end
+        end
+
+        cache.running[bufnr] = best_cmd or false
+        return best_cmd
+      end
+
+      local function terminal_last_command(bufnr, cache)
+        cache = cache or {}
+        cache.last = cache.last or {}
+
+        if cache.last[bufnr] ~= nil then
+          return cache.last[bufnr] or nil
+        end
+
+        if not vim.api.nvim_buf_is_loaded(bufnr) then
+          cache.last[bufnr] = false
+          return nil
+        end
+
+        local line_count = vim.api.nvim_buf_line_count(bufnr)
+        local start = math.max(line_count - 200, 0)
+        local lines = vim.api.nvim_buf_get_lines(bufnr, start, line_count, false)
+
+        local patterns = {
+          "^%s*[>$#]%s+(.+)$",
+          "^%s*❯%s+(.+)$",
+          "^%s*➜%s+(.+)$",
+          "^%s*%$%s+(.+)$",
+        }
+
+        for i = #lines, 1, -1 do
+          local line = vim.trim(lines[i] or "")
+          if line ~= "" then
+            for _, pat in ipairs(patterns) do
+              local cmd = line:match(pat)
+              if cmd then
+                cmd = vim.trim(cmd)
+                if cmd ~= "" then
+                  cache.last[bufnr] = cmd
+                  return cmd
+                end
+              end
+            end
+          end
+        end
+
+        cache.last[bufnr] = false
+        return nil
+      end
+
+      local function terminal_label(bufnr, cache)
         local shell0 = basename(vim.o.shell or "")
 
+        -- Prefer last executed command (works for quick commands like `git status`).
+        local last = terminal_last_command(bufnr, cache)
+        if last and last ~= "" then
+          return last
+        end
+
+        -- Fallback: detect currently-running foreground-ish process via `ps`.
+        local running = terminal_running_command(bufnr, cache)
+        if running and running ~= "" then
+          local running0 = basename(running:match("^(%S+)") or running)
+          if running0 ~= shell0 then
+            return running
+          end
+        end
+
+        -- Fallback to channel argv (often just the shell)
         local chan = vim.bo[bufnr].channel
         if chan and chan ~= 0 then
           local ok, info = pcall(vim.api.nvim_get_chan_info, chan)
@@ -71,13 +220,15 @@ return {
               end
               return argv[3]
             end
+
+            return argv0
           end
         end
 
-        -- Fallback: parse terminal buffer name like "term://...:<cmd>"
+        -- Fallback: parse terminal buffer name like "term://...:<cmd>".
         local name = vim.api.nvim_buf_get_name(bufnr)
         if name ~= "" then
-          local cmd = name:match("^[^:]+:(.*)$")
+          local cmd = name:match("^term://.*:(.*)$") or name:match(".*:(.*)$")
           if cmd then
             cmd = vim.trim(cmd)
             if cmd ~= "" then
@@ -128,6 +279,7 @@ return {
 
       local function pick_terminal_buffers()
         local opts = { previewer = false, disable_devicons = true }
+        opts._terminal_cmd_cache = {}
 
         opts.entry_maker = (function(ref_opts)
           local displayer
@@ -171,7 +323,7 @@ return {
 
             displayer = displayer or make_displayer()
 
-            local label = terminal_label(entry.bufnr)
+            local label = terminal_label(entry.bufnr, ref_opts._terminal_cmd_cache)
             local indicator = compute_indicator(entry)
             local badge = exit_badge(entry.bufnr)
 

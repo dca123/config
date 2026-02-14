@@ -44,6 +44,17 @@ vim.opt.swapfile = false
 vim.opt.scrolloff = 999
 vim.opt.signcolumn = "yes:1"
 
+-- Terminal buffers usually have empty `filetype`, so `after/ftplugin/terminal.lua`
+-- won't run for `:terminal`. Set `filetype=terminal` so the ftplugin applies.
+vim.api.nvim_create_autocmd("TermOpen", {
+  group = vim.api.nvim_create_augroup("TerminalFiletype", { clear = true }),
+  callback = function(ev)
+    if vim.bo[ev.buf].filetype == "" then
+      vim.bo[ev.buf].filetype = "terminal"
+    end
+  end,
+})
+
 vim.opt.title = true
 vim.opt.titlestring = [[%{fnamemodify(getcwd(), ':t')}]]
 

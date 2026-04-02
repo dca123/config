@@ -114,7 +114,7 @@ return {
         local client = vim.lsp.get_client_by_id(ctx.client_id)
         if client and client.name == 'typescript-tools' then
           result = vim.iter(result):map(function(hint)
-            local label = hint.label
+            local label = hint.label ---@type string
             if label:len() >= 30 then
               label = label:sub(1, 29) .. "..."
             end
@@ -134,17 +134,14 @@ return {
             return
           end
 
-          -- Go to definition
-          -- For typescript-tools, we use TSToolsGoToSourceDefinition to avoid going to imports
-          if client.name == "typescript-tools" then
-            vim.keymap.set("n", "gd", "<cmd>TSToolsGoToSourceDefinition<cr>",
-              { buffer = args.buf, desc = "Go to Source Definition" })
-            vim.b[args.buf].ts_tools_attached = true
-          elseif client.supports_method("textDocument/definition") and not vim.b[args.buf].ts_tools_attached then
+          if client:supports_method("textDocument/definition") and not vim.b[args.buf].ts_tools_attached then
             vim.keymap.set("n", "gd", vim.lsp.buf.definition, { buffer = args.buf, desc = "Go to Definition" })
+            if client.name == "typescript-tools" then
+              vim.b[args.buf].ts_tools_attached = true
+            end
           end
 
-          if client.supports_method("textDocument/inlay_hint") then
+          if client:supports_method("textDocument/inlay_hint") then
             vim.lsp.inlay_hint.enable(true, { 0 })
           end
         end,

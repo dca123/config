@@ -1,13 +1,15 @@
 return {
   {
     'nvim-telescope/telescope.nvim',
-    tag = '0.1.8',
     dependencies = { 'nvim-lua/plenary.nvim', { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' } },
     config = function()
       local actions = require("telescope.actions")
       local builtin = require("telescope.builtin")
+      local conf = require("telescope.config").values
       local entry_display = require("telescope.pickers.entry_display")
+      local finders = require("telescope.finders")
       local make_entry = require("telescope.make_entry")
+      local pickers = require("telescope.pickers")
 
       require("telescope").setup({
         pickers = {
@@ -30,20 +32,39 @@ return {
       end
 
       local function is_file_buffer(bufnr)
-        if vim.bo[bufnr].buftype ~= "" then
+        local buftype = vim.bo[bufnr].buftype
+        if buftype == "terminal" or buftype == "prompt" then
           return false
         end
 
         local name = vim.api.nvim_buf_get_name(bufnr)
-        if name == "" then
-          return false
-        end
-
-        if is_uri_path(name) then
+        if name ~= "" and is_uri_path(name) then
           return false
         end
 
         return true
+      end
+
+      local function listed_buffer_entries(predicate)
+        local bufnrs = vim.tbl_filter(function(bufnr)
+          return vim.fn.buflisted(bufnr) == 1 and predicate(bufnr)
+        end, vim.api.nvim_list_bufs())
+
+        table.sort(bufnrs, function(a, b)
+          return vim.fn.getbufinfo(a)[1].lastused > vim.fn.getbufinfo(b)[1].lastused
+        end)
+
+        local entries = {}
+        for _, bufnr in ipairs(bufnrs) do
+          local flag = bufnr == vim.fn.bufnr("") and "%" or (bufnr == vim.fn.bufnr("#") and "#" or " ")
+          table.insert(entries, {
+            bufnr = bufnr,
+            flag = flag,
+            info = vim.fn.getbufinfo(bufnr)[1],
+          })
+        end
+
+        return entries, bufnrs
       end
 
       local function basename(path)
@@ -262,19 +283,26 @@ return {
 
       local function pick_file_buffers()
         local opts = {}
-        opts.entry_maker = (function(ref_opts)
-          local base
-          return function(entry)
-            if not is_file_buffer(entry.bufnr) then
-              return nil
-            end
+        local entries, bufnrs = listed_buffer_entries(is_file_buffer)
+        if #entries == 0 then
+          vim.notify("No file buffers found", vim.log.levels.INFO)
+          return
+        end
 
-            base = base or make_entry.gen_from_buffer(ref_opts)
-            return base(entry)
-          end
-        end)(opts)
+        opts.bufnr_width = #tostring(math.max(unpack(bufnrs)))
+        opts.entry_maker = make_entry.gen_from_buffer(opts)
 
-        builtin.buffers(opts)
+        pickers
+          .new(opts, {
+            prompt_title = "Buffers",
+            finder = finders.new_table({
+              results = entries,
+              entry_maker = opts.entry_maker,
+            }),
+            previewer = conf.grep_previewer(opts),
+            sorter = conf.generic_sorter(opts),
+          })
+          :find()
       end
 
       local function pick_terminal_buffers()

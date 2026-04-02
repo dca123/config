@@ -1,7 +1,6 @@
 return {
   {
     'vyfor/cord.nvim',
-    build = ':Cord update',
     opts = {}
   },
   { 'echasnovski/mini.pairs', version = false, config = true },
@@ -34,8 +33,8 @@ return {
   --     vim.keymap.set('n', '<leader>oe', before.show_edits_in_telescope, {})
   --   end
   -- },
-  {
-    dir = "~/Projects/example.nvim",
-    opts = { name = "Devinda" }
-  },
+--   {
+--     dir = "~/Projects/example.nvim",
+--     opts = { name = "Devinda" }
+--   },
 }

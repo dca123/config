@@ -69,8 +69,6 @@ vim.api.nvim_create_autocmd("TermOpen", {
 vim.opt.title = true
 vim.opt.titlestring = [[%{fnamemodify(getcwd(), ':t')}]]
 
-vim.opt.foldmethod = 'expr'
-vim.opt.foldexpr = 'nvim_treesitter#foldexpr()'
 vim.opt.foldenable = true
 vim.opt.foldlevel = 99
 vim.opt.foldminlines = 5

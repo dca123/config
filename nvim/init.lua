@@ -23,6 +23,17 @@ vim.keymap.set({ "n" }, "<M-S-v>", "<C-w>q", { desc = "Quit Window" })
 
 -- Clear highlights
 vim.keymap.set("n", "<leader>ch", "<CMD>noh<CR>", { desc = "Clear highlights" })
+-- Auto-hide search highlights in insert mode
+vim.api.nvim_create_autocmd("InsertEnter", {
+	callback = function()
+		vim.opt.hlsearch = false
+	end,
+})
+vim.api.nvim_create_autocmd("InsertLeave", {
+	callback = function()
+		vim.opt.hlsearch = true
+	end,
+})
 -- Exit terminal mode
 vim.keymap.set('t', '<M-Esc>', '<C-\\><C-n>', { noremap = true, desc = "Exit terminal" })
 -- Enter terminal mode
@@ -58,8 +69,6 @@ vim.api.nvim_create_autocmd("TermOpen", {
 vim.opt.title = true
 vim.opt.titlestring = [[%{fnamemodify(getcwd(), ':t')}]]
 
-vim.opt.foldmethod = 'expr'
-vim.opt.foldexpr = 'nvim_treesitter#foldexpr()'
 vim.opt.foldenable = true
 vim.opt.foldlevel = 99
 vim.opt.foldminlines = 5

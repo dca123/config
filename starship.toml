@@ -189,3 +189,12 @@ format = '\[[$symbol($version)]($style)\]'
 
 [solidity]
 format = '\[[$symbol($version)]($style)\]'
+
+[custom.jj]
+command = "prompt"
+format = "$output"
+ignore_timeout = true
+shell = ["/Users/devinda/.cargo/bin/starship-jj", "--ignore-working-copy", "starship"]
+use_stdin = false
+when = true
+

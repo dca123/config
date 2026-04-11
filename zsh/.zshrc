@@ -19,6 +19,10 @@ source "$ZPLUG_REPOS/Leizhenpeng/zsh-plugin-pnpm/pnpm.plugin.zsh"
 source "$ZPLUG_REPOS/zsh-users/zsh-autosuggestions/zsh-autosuggestions.zsh"
 source "$ZPLUG_REPOS/MichaelAquilina/zsh-you-should-use/zsh-you-should-use.plugin.zsh"
 
+# Resolve `pi` alias collision with installed CLI
+unalias pi 2>/dev/null
+alias pinit='pnpm init'
+
 # --- 3. zplug Management Function ---
 zplug-manage() {
   source ~/.zplug/init.zsh
@@ -75,7 +79,18 @@ take() {
   mkdir -p $@ && cd ${@:$#}
 }
 
+# Use the btca CLI from the better-context repo (dev version)
+btca() {
+  bun run "/Users/devinda/Projects/better-context/apps/cli/src/index.ts" "$@"
+}
+
+btca-global() {
+  command btca "$@"
+}
+
 # --- 8. Environment and Paths ---
+export PATH="$HOME/.cargo/bin:$PATH"
+
 # pnpm
 export PNPM_HOME="/Users/devinda/Library/pnpm"
 case ":$PATH:" in
@@ -86,6 +101,9 @@ esac
 export PATH="$HOME/go/bin:$PATH"
 export HOMEBREW_NO_AUTO_UPDATE=1
 export PATH=/Users/devinda/.opencode/bin:$PATH
+export OPENCODE_ENABLE_EXA=1
+# Load local secrets from an untracked file, e.g. export EXA_API_KEY=...
+[[ -f "$HOME/.zsh.secrets" ]] && source "$HOME/.zsh.secrets"
 export PATH="$PATH:/Users/devinda/.lmstudio/bin"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
@@ -106,3 +124,6 @@ fi
 
 # bun completions
 [ -s "/Users/devinda/.bun/_bun" ] && source "/Users/devinda/.bun/_bun"
+
+# Vite+ bin (https://viteplus.dev)
+. "$HOME/.vite-plus/env"

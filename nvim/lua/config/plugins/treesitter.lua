@@ -4,11 +4,15 @@ return {
     lazy = false,
     build = ":TSUpdate",
     config = function()
-      require("nvim-treesitter").install({
-        "lua", "vim", "vimdoc", "query",
-        "markdown", "markdown_inline",
-        "html", "css", "json",
-        "javascript", "typescript", "tsx", "jsdoc",
+      require("nvim-treesitter.configs").setup({
+        ensure_installed = {
+          "lua", "vim", "vimdoc", "query",
+          "markdown", "markdown_inline",
+          "html", "css", "json",
+          "javascript", "typescript", "tsx", "jsdoc",
+        },
+        sync_install = false,
+        auto_install = false,
       })
 
       vim.api.nvim_create_autocmd("FileType", {

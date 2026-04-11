@@ -81,7 +81,7 @@ return {
     opts = {
       width = 120,
       autocmds = {
-        enableOnVimEnter = true,
+        enableOnVimEnter = false,
         skipEnteringNoNeckPainBuffer = false,
       },
       mappings = {

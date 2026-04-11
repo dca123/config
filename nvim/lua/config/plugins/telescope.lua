@@ -4,23 +4,16 @@ return {
     dependencies = { 'nvim-lua/plenary.nvim', { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' } },
     config = function()
       local actions = require("telescope.actions")
+      local action_state = require("telescope.actions.state")
       local builtin = require("telescope.builtin")
       local conf = require("telescope.config").values
       local entry_display = require("telescope.pickers.entry_display")
       local finders = require("telescope.finders")
       local make_entry = require("telescope.make_entry")
       local pickers = require("telescope.pickers")
+      local previewers = require("telescope.previewers")
 
       require("telescope").setup({
-        pickers = {
-          buffers = {
-            mappings = {
-              n = {
-                ["bd"] = actions.delete_buffer + actions.move_to_top,
-              },
-            },
-          },
-        },
         extensions = {
           fzf = {},
         },
@@ -281,6 +274,49 @@ return {
         return code
       end
 
+      local function attach_buffer_picker_mappings(prompt_bufnr, map)
+        actions.select_default:replace(function()
+          local selection = action_state.get_selected_entry()
+          actions.close(prompt_bufnr)
+          if selection and selection.bufnr then
+            vim.api.nvim_set_current_buf(selection.bufnr)
+          end
+        end)
+
+        map("n", "bd", actions.delete_buffer + actions.move_to_top)
+        return true
+      end
+
+      local function open_buffer_picker(opts)
+        local results = opts.results
+        if vim.tbl_isempty(results) then
+          vim.notify("No buffers found", vim.log.levels.INFO)
+          return
+        end
+
+        local max_bufnr = 0
+        for _, entry in ipairs(results) do
+          max_bufnr = math.max(max_bufnr, entry.bufnr)
+        end
+        opts.bufnr_width = #tostring(max_bufnr)
+
+        pickers.new(opts, {
+          prompt_title = opts.prompt_title or "Buffers",
+          finder = finders.new_table({
+            results = results,
+            entry_maker = opts.entry_maker,
+          }),
+          previewer = opts.previewer,
+          sorter = conf.generic_sorter(opts),
+          attach_mappings = function(prompt_bufnr, map)
+            if opts.attach_mappings then
+              return opts.attach_mappings(prompt_bufnr, map)
+            end
+            return attach_buffer_picker_mappings(prompt_bufnr, map)
+          end,
+        }):find()
+      end
+
       local function pick_file_buffers()
         local opts = {}
         local entries, bufnrs = listed_buffer_entries(is_file_buffer)
@@ -301,13 +337,36 @@ return {
             }),
             previewer = conf.grep_previewer(opts),
             sorter = conf.generic_sorter(opts),
+            attach_mappings = attach_buffer_picker_mappings,
           })
           :find()
       end
 
       local function pick_terminal_buffers()
-        local opts = { previewer = false, disable_devicons = true }
+        local terminal_previewer = previewers.new_buffer_previewer({
+          title = "Terminal Output",
+          define_preview = function(self, entry)
+            local bufnr = entry and entry.bufnr
+            if not bufnr or not vim.api.nvim_buf_is_valid(bufnr) then
+              vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, { "Terminal buffer unavailable" })
+              return
+            end
+
+            local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+            if vim.tbl_isempty(lines) then
+              lines = { "" }
+            end
+
+            vim.bo[self.state.bufnr].filetype = "terminal"
+            vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
+          end,
+        })
+
+        local opts = { prompt_title = "Buffers (terminals)", previewer = terminal_previewer, disable_devicons = true }
         opts._terminal_cmd_cache = {}
+        opts.results = listed_buffer_entries(function(bufnr)
+          return vim.bo[bufnr].buftype == "terminal"
+        end)
 
         opts.entry_maker = (function(ref_opts)
           local displayer
@@ -345,10 +404,6 @@ return {
           end
 
           return function(entry)
-            if vim.bo[entry.bufnr].buftype ~= "terminal" then
-              return nil
-            end
-
             displayer = displayer or make_displayer()
 
             local label = terminal_label(entry.bufnr, ref_opts._terminal_cmd_cache)
@@ -372,7 +427,7 @@ return {
           end
         end)(opts)
 
-        builtin.buffers(opts)
+        open_buffer_picker(opts)
       end
 
       vim.keymap.set("n", "<leader>ht", builtin.help_tags)

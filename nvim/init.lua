@@ -55,6 +55,37 @@ vim.opt.swapfile = false
 vim.opt.scrolloff = 999
 vim.opt.signcolumn = "yes:1"
 
+-- Keep host terminal/terminal app scrolling in terminal buffers by disabling
+-- Neovim mouse handling while a terminal buffer is focused.
+local default_mouse = vim.o.mouse
+vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter", "TermEnter" }, {
+  group = vim.api.nvim_create_augroup("TerminalMouse", { clear = true }),
+  callback = function(ev)
+    if vim.bo[ev.buf].buftype == "terminal" then
+      vim.o.mouse = ""
+    else
+      vim.o.mouse = default_mouse
+    end
+  end,
+})
+vim.api.nvim_create_autocmd({ "BufLeave", "WinLeave", "TermLeave" }, {
+  group = vim.api.nvim_create_augroup("TerminalMouseRestore", { clear = true }),
+  callback = function()
+    vim.o.mouse = default_mouse
+  end,
+})
+
+-- Make terminal buffers feel more native: when focused, go straight back into
+-- terminal-job mode so typing works immediately.
+vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
+  group = vim.api.nvim_create_augroup("TerminalAutoInsert", { clear = true }),
+  callback = function(ev)
+    if vim.bo[ev.buf].buftype == "terminal" then
+      vim.cmd("startinsert")
+    end
+  end,
+})
+
 -- Terminal buffers usually have empty `filetype`, so `after/ftplugin/terminal.lua`
 -- won't run for `:terminal`. Set `filetype=terminal` so the ftplugin applies.
 vim.api.nvim_create_autocmd("TermOpen", {

@@ -102,8 +102,8 @@ export PATH="$HOME/go/bin:$PATH"
 export HOMEBREW_NO_AUTO_UPDATE=1
 export PATH=/Users/devinda/.opencode/bin:$PATH
 export OPENCODE_ENABLE_EXA=1
-# Load local secrets from an untracked file, e.g. export EXA_API_KEY=...
-[[ -f "$HOME/.zsh.secrets" ]] && source "$HOME/.zsh.secrets"
+# Load EXA_API_KEY from macOS Keychain if present
+export EXA_API_KEY="$(security find-generic-password -a "$USER" -s EXA_API_KEY -w 2>/dev/null)"
 export PATH="$PATH:/Users/devinda/.lmstudio/bin"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"

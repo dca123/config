@@ -1,4 +1,4 @@
+export ZDOTDIR="${ZDOTDIR:-$HOME/.config/zsh}"
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 
-# Vite+ bin (https://viteplus.dev)
-. "$HOME/.vite-plus/env"
-. "$HOME/.cargo/env"
+[[ -f "$ZDOTDIR/local.zshenv" ]] && source "$ZDOTDIR/local.zshenv"

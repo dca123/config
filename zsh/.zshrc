@@ -12,12 +12,17 @@ _comp_dumpfile="${ZDOTDIR:-$HOME}/.zcompdump"
 
 # --- 2. Instant Plugin Loading (Bypassing zplug) ---
 ZPLUG_REPOS="$HOME/.zplug/repos"
-source "$ZPLUG_REPOS/robbyrussell/oh-my-zsh/lib/directories.zsh"
-source "$ZPLUG_REPOS/robbyrussell/oh-my-zsh/plugins/git/git.plugin.zsh"
-source "$ZPLUG_REPOS/robbyrussell/oh-my-zsh/plugins/alias-finder/alias-finder.plugin.zsh"
-source "$ZPLUG_REPOS/Leizhenpeng/zsh-plugin-pnpm/pnpm.plugin.zsh"
-source "$ZPLUG_REPOS/zsh-users/zsh-autosuggestions/zsh-autosuggestions.zsh"
-source "$ZPLUG_REPOS/MichaelAquilina/zsh-you-should-use/zsh-you-should-use.plugin.zsh"
+_source_if_exists() {
+  [[ -f "$1" ]] && source "$1"
+}
+
+_source_if_exists "$ZPLUG_REPOS/robbyrussell/oh-my-zsh/lib/directories.zsh"
+_source_if_exists "$ZPLUG_REPOS/robbyrussell/oh-my-zsh/plugins/git/git.plugin.zsh"
+_source_if_exists "$ZPLUG_REPOS/robbyrussell/oh-my-zsh/plugins/alias-finder/alias-finder.plugin.zsh"
+_source_if_exists "$ZPLUG_REPOS/Leizhenpeng/zsh-plugin-pnpm/pnpm.plugin.zsh"
+_source_if_exists "$ZPLUG_REPOS/zsh-users/zsh-autosuggestions/zsh-autosuggestions.zsh"
+_source_if_exists "$ZPLUG_REPOS/MichaelAquilina/zsh-you-should-use/zsh-you-should-use.plugin.zsh"
+unfunction _source_if_exists
 
 # Resolve `pi` alias collision with installed CLI
 unalias pi 2>/dev/null
@@ -25,7 +30,7 @@ alias pinit='pnpm init'
 
 # --- 3. zplug Management Function ---
 zplug-manage() {
-  source ~/.zplug/init.zsh
+  source "$HOME/.zplug/init.zsh"
   zplug "plugins/git", from:oh-my-zsh
   zplug "plugins/alias-finder", from:oh-my-zsh
   zplug "Leizhenpeng/zsh-plugin-pnpm"
@@ -76,54 +81,21 @@ touchp() {
 }
 
 take() {
-  mkdir -p $@ && cd ${@:$#}
-}
-
-# Use the btca CLI from the better-context repo (dev version)
-btca() {
-  bun run "/Users/devinda/Projects/better-context/apps/cli/src/index.ts" "$@"
-}
-
-btca-global() {
-  command btca "$@"
+  mkdir -p "$@" && cd "${@:$#}"
 }
 
 # --- 8. Environment and Paths ---
-export PATH="$HOME/.cargo/bin:$PATH"
+export HOMEBREW_NO_AUTO_UPDATE=1
 
-# pnpm
-export PNPM_HOME="/Users/devinda/Library/pnpm"
+# pnpm: default macOS install location; override PNPM_HOME per-machine if needed.
+export PNPM_HOME="${PNPM_HOME:-$HOME/Library/pnpm}"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 
-export PATH="$HOME/go/bin:$PATH"
-export HOMEBREW_NO_AUTO_UPDATE=1
-export PATH=/Users/devinda/.opencode/bin:$PATH
-export OPENCODE_ENABLE_EXA=1
-# Load EXA_API_KEY from macOS Keychain if present
-export EXA_API_KEY="$(security find-generic-password -a "$USER" -s EXA_API_KEY -w 2>/dev/null)"
-export PATH="$PATH:/Users/devinda/.lmstudio/bin"
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-
 # --- 9. Initializations ---
-eval "$(starship init zsh)"
-eval "$(zoxide init zsh)"
+command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
+command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
 
-# Cache opam env
-ZSH_CACHE="$ZDOTDIR/.cache"
-if [[ -f "$ZSH_CACHE/opam_env" ]]; then
-  source "$ZSH_CACHE/opam_env"
-else
-  mkdir -p "$ZSH_CACHE"
-  opam env > "$ZSH_CACHE/opam_env"
-  source "$ZSH_CACHE/opam_env"
-fi
-
-# bun completions
-[ -s "/Users/devinda/.bun/_bun" ] && source "/Users/devinda/.bun/_bun"
-
-# Vite+ bin (https://viteplus.dev)
-. "$HOME/.vite-plus/env"
+[[ -f "$ZDOTDIR/local.zsh" ]] && source "$ZDOTDIR/local.zsh"

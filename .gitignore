@@ -10,6 +10,11 @@
 /zsh/.zsh_sessions/
 /zsh/.cache/
 
+# zsh machine-local config
+/zsh/local.zsh
+/zsh/local.zshenv
+/zsh/local.profile.zsh
+
 !starship.toml
 
 # opencode plans

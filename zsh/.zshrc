@@ -1,3 +1,19 @@
+# --- 0. Base PATH ---
+ZSH_CACHE="${ZDOTDIR:-$HOME/.config/zsh}/.cache"
+if [[ -f "$ZSH_CACHE/brew_env" ]]; then
+  source "$ZSH_CACHE/brew_env"
+else
+  for _brew in /opt/homebrew/bin/brew /usr/local/bin/brew "$HOME/.linuxbrew/bin/brew"; do
+    if [[ -x "$_brew" ]]; then
+      mkdir -p "$ZSH_CACHE"
+      "$_brew" shellenv > "$ZSH_CACHE/brew_env"
+      source "$ZSH_CACHE/brew_env"
+      break
+    fi
+  done
+  unset _brew
+fi
+
 # --- 1. Fast Autocomplete (compinit) ---
 autoload -Uz compinit
 _comp_dumpfile="${ZDOTDIR:-$HOME}/.zcompdump"

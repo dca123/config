@@ -6,7 +6,7 @@ This machine currently has dotfiles tracked directly under `~/.config`. The goal
 - work machine
 - Linux machine
 
-Use one chezmoi repo, not git submodules.
+Use one chezmoi repo.
 
 Suggested remote:
 
@@ -51,16 +51,11 @@ The existing zsh structure already supports this. The shared zsh files source th
 [[ -f "$ZDOTDIR/local.zsh" ]] && source "$ZDOTDIR/local.zsh"
 ```
 
-## Do not manage generated/cache files
+## What to manage
 
-Never add these to chezmoi:
+Track config files you intentionally edit.
 
-```txt
-~/.config/zsh/.zsh_history
-~/.config/zsh/.zcompdump
-~/.config/zsh/.zsh_sessions/
-~/.config/zsh/.cache/
-```
+Avoid managing ephemeral/generated state (history, caches, sessions, dumps, temp/backup files).
 
 ## Machine identity
 

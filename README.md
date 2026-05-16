@@ -52,16 +52,11 @@ dot_config/zsh/local.profile.zsh.tmpl
 dot_config/zsh/local.zsh.tmpl
 ```
 
-## Do not manage generated state
+## What to manage
 
-Do not add:
+Track config files you intentionally edit.
 
-```txt
-~/.config/zsh/.zsh_history
-~/.config/zsh/.zcompdump*
-~/.config/zsh/.zsh_sessions/
-~/.config/zsh/.cache/
-```
+Avoid managing ephemeral/generated state (history, caches, sessions, dumps, temp/backup files).
 
 ## Setup on a new machine
 

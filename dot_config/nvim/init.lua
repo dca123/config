@@ -107,3 +107,8 @@ vim.opt.foldminlines = 5
 -- Persistent Undo
 vim.opt.undofile = true
 vim.opt.undodir = vim.fn.stdpath("data") .. "/undo"
+
+-- Copy file path
+vim.keymap.set("n", "<leader>cp", function()
+  vim.fn.setreg("+", vim.fn.expand("%"))
+end, { desc = "Copy file path" })

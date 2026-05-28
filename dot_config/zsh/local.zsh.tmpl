@@ -54,4 +54,20 @@ if [[ -f "$HOME/Projects/better-context/apps/cli/src/index.ts" ]]; then
     command btca "$@"
   }
 fi
+{{ end }}
+
+{{ if eq .machine "work" -}}
+# Prefer raw npm/npx on this machine; drop the global pnpm aliases.
+unalias npm 2>/dev/null
+unalias npx 2>/dev/null
+
+# Personal scripts (e.g. ~/bin/night-man).
+export PATH="$HOME/bin:$PATH"
+
+# lumen diff shortcut.
+alias ld="lumen diff"
+
+# NVM (only installed on this machine).
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 {{ end -}}

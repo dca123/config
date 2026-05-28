@@ -69,6 +69,19 @@ bindkey -v
 export KEYTIMEOUT=1
 export EDITOR=nvim
 
+# Vi text objects (ci", da(, etc.)
+autoload -Uz select-quoted select-bracketed
+zle -N select-quoted
+zle -N select-bracketed
+for m in visual viopp; do
+  for c in {a,i}{\',\",\`}; do
+    bindkey -M $m -- $c select-quoted
+  done
+  for c in {a,i}${(s..)^:-'()[]{}<>bB'}; do
+    bindkey -M $m -- $c select-bracketed
+  done
+done
+
 # --- 5. Aliases ---
 alias loadenv='export $(grep -v "^#" .env | xargs)'
 alias n="nvim"

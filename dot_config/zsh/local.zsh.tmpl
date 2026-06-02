@@ -67,7 +67,31 @@ export PATH="$HOME/bin:$PATH"
 # lumen diff shortcut.
 alias ld="lumen diff"
 
-# NVM (only installed on this machine).
+# NVM (only installed on this machine), lazy-loaded.
+# Sourcing nvm.sh on every shell costs 1-3s (nvm_auto stats the whole install).
+# Instead: put the default node version on PATH now (instant), and only load
+# the full nvm machinery the first time `nvm` is actually invoked.
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+  # Add default node version to PATH directly so node/npm/npx work immediately.
+  if [ -f "$NVM_DIR/alias/default" ]; then
+    _nvm_default="$(< "$NVM_DIR/alias/default")"
+    # Resolve a bare major (e.g. "22") to a concrete vX.Y.Z dir.
+    if [ -d "$NVM_DIR/versions/node/v$_nvm_default/bin" ]; then
+      export PATH="$NVM_DIR/versions/node/v$_nvm_default/bin:$PATH"
+    else
+      _nvm_default_dir=("$NVM_DIR"/versions/node/v"$_nvm_default"*/bin(N))
+      [ -n "$_nvm_default_dir" ] && export PATH="${_nvm_default_dir[-1]}:$PATH"
+      unset _nvm_default_dir
+    fi
+    unset _nvm_default
+  fi
+
+  # Lazy stub: load real nvm on first use, then re-exec the requested command.
+  nvm() {
+    unset -f nvm
+    \. "$NVM_DIR/nvm.sh"
+    nvm "$@"
+  }
+fi
 {{ end -}}

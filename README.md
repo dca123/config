@@ -61,7 +61,7 @@ Avoid managing ephemeral/generated state (history, caches, sessions, dumps, temp
 ## Setup on a new machine
 
 ```bash
-chezmoi init git@github.com:dca123/dotfiles.git
+chezmoi init git@github.com:dca123/config.git
 chezmoi edit-config
 chezmoi diff
 chezmoi apply

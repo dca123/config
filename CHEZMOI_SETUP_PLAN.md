@@ -11,7 +11,7 @@ Use one chezmoi repo.
 Suggested remote:
 
 ```txt
-git@github.com:dca123/dotfiles.git
+git@github.com:dca123/config.git
 ```
 
 ## Desired model
@@ -169,7 +169,7 @@ chezmoi cd
 git init
 git add .
 git commit -m "Initial chezmoi dotfiles"
-git remote add origin git@github.com:dca123/dotfiles.git
+git remote add origin git@github.com:dca123/config.git
 git push -u origin main
 ```
 
@@ -178,7 +178,7 @@ git push -u origin main
 Install chezmoi, then:
 
 ```bash
-chezmoi init git@github.com:dca123/dotfiles.git
+chezmoi init git@github.com:dca123/config.git
 chezmoi edit-config
 ```
 

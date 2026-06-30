@@ -1,3 +1,34 @@
 # Documentation for the dotfiles repo, not a home-directory target.
 README.md
 CHEZMOI_SETUP_PLAN.md
+
+# Pi auth, runtime state, package caches, and generated extension output must stay per-machine.
+.pi/agent/auth.json
+.pi/agent/codex-multiplexer.json
+.pi/agent/pins.json
+.pi/agent/trust.json
+.pi/agent/settings.json.*.bak
+.pi/agent/.advisor-state.json
+.pi/agent/sessions
+.pi/agent/sessions/**
+.pi/agent/cache
+.pi/agent/cache/**
+.pi/agent/git
+.pi/agent/git/**
+.pi/agent/debug
+.pi/agent/debug/**
+.pi/agent/handoffs
+.pi/agent/handoffs/**
+.pi/agent/state
+.pi/agent/state/**
+.pi/agent/context-prune
+.pi/agent/context-prune/**
+.pi/agent/pi-rewind/shadow-git
+.pi/agent/pi-rewind/shadow-git/**
+.pi/agent/bundle-tool
+.pi/agent/bundle-tool/**
+.pi/agent/extensions-staging
+.pi/agent/extensions-staging/**
+.pi/agent/**/node_modules
+.pi/agent/**/node_modules/**
+.pi/agent/**/dist

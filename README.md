@@ -69,6 +69,14 @@ chezmoi apply
 
 Set the appropriate `[data] machine = "..."` before applying.
 
+## Pi setup
+
+chezmoi bootstraps Pi by cloning `git@github.com:dca123/pi-config.git` into `~/.pi/agent`, installing `@earendil-works/pi-coding-agent@0.79.8`, creating `settings.json` only if it is missing, installing local extension dependencies, and linking Plannotator skills from `~/Projects/plannotator`.
+
+Machine-local Pi data is ignored: auth, trust, sessions, caches, package clone caches, debug logs, node_modules, build output, and pi-rewind shadow git state.
+
+Reproduction gates: `~/.pi/agent` must be committed and pushed to `git@github.com:dca123/pi-config.git` before another machine can clone the Pi setup. `~/Projects/pi-context`, `~/Projects/pi-context-prune`, and `~/Projects/plannotator` have local changes or commits that are not represented by the externals' remotes, so those changes will not reproduce elsewhere until they are pushed or packaged. `night-man` has no configured remote, so `/day-man review` needs a manual `~/Projects/night-man` checkout if you want that review flow.
+
 ## Daily workflow
 
 ```bash

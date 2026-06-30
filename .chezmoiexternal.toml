@@ -1,0 +1,27 @@
+[".pi/agent"]
+type = "git-repo"
+url = "git@github.com:dca123/pi-config.git"
+refreshPeriod = "168h"
+[".pi/agent".pull]
+args = ["--ff-only"]
+
+["Projects/pi-context"]
+type = "git-repo"
+url = "https://github.com/ttttmr/pi-context.git"
+refreshPeriod = "168h"
+["Projects/pi-context".pull]
+args = ["--ff-only"]
+
+["Projects/pi-context-prune"]
+type = "git-repo"
+url = "https://github.com/championswimmer/pi-context-prune.git"
+refreshPeriod = "168h"
+["Projects/pi-context-prune".pull]
+args = ["--ff-only"]
+
+["Projects/plannotator"]
+type = "git-repo"
+url = "git@github.com:dca123/plannotator.git"
+refreshPeriod = "168h"
+["Projects/plannotator".pull]
+args = ["--ff-only"]

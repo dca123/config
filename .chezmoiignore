@@ -32,3 +32,4 @@ CHEZMOI_SETUP_PLAN.md
 .pi/agent/**/node_modules
 .pi/agent/**/node_modules/**
 .pi/agent/**/dist
+.pi/agent/**/dist/**
